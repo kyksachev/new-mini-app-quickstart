@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import Image from "next/image";
 import { minikitConfig } from "../minikit.config";
+import WalletConnect from "./components/WalletConnect";
 import styles from "./page.module.css";
 
 interface Token {
@@ -22,6 +23,7 @@ export default function Home() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
   // Initialize the miniapp
   useEffect(() => {
@@ -143,6 +145,16 @@ export default function Home() {
     return `$${marketCap.toFixed(2)}`;
   };
 
+  const handleWalletConnected = (address: string) => {
+    setWalletAddress(address);
+    console.log("Wallet connected:", address);
+  };
+
+  const handleWalletDisconnected = () => {
+    setWalletAddress(null);
+    console.log("Wallet disconnected");
+  };
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -162,6 +174,11 @@ export default function Home() {
       </header>
 
       <main className={styles.main}>
+        <WalletConnect 
+          onWalletConnected={handleWalletConnected}
+          onWalletDisconnected={handleWalletDisconnected}
+        />
+        
         {loading ? (
           <div className={styles.loading}>
             <div className={styles.spinner}></div>
