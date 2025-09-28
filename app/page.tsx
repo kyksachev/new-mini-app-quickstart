@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import Image from "next/image";
 import { minikitConfig } from "../minikit.config";
 import styles from "./page.module.css";
 
@@ -17,7 +18,7 @@ interface Token {
 }
 
 export default function Home() {
-  const { isFrameReady, setFrameReady, context } = useMiniKit();
+  const { isFrameReady, setFrameReady } = useMiniKit();
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -171,7 +172,13 @@ export default function Home() {
             {filteredTokens.map((token) => (
               <div key={token.id} className={styles.tokenCard}>
                 <div className={styles.tokenHeader}>
-                  <img src={token.logo} alt={token.name} className={styles.tokenLogo} />
+                  <Image 
+                    src={token.logo} 
+                    alt={token.name} 
+                    width={48}
+                    height={48}
+                    className={styles.tokenLogo} 
+                  />
                   <div className={styles.tokenInfo}>
                     <h3 className={styles.tokenName}>{token.name}</h3>
                     <span className={styles.tokenSymbol}>{token.symbol}</span>
