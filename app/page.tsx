@@ -41,7 +41,7 @@ export default function Home() {
         priceChange24h: 2.34,
         volume24h: 15420000000,
         marketCap: 390000000000,
-        logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+        logo: "/tokens/eth.svg",
         address: "0x0000000000000000000000000000000000000000"
       },
       {
@@ -52,7 +52,7 @@ export default function Home() {
         priceChange24h: 0.01,
         volume24h: 3200000000,
         marketCap: 32000000000,
-        logo: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png",
+        logo: "/tokens/usdc.svg",
         address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
       },
       {
@@ -63,7 +63,7 @@ export default function Home() {
         priceChange24h: -0.02,
         volume24h: 450000000,
         marketCap: 5400000000,
-        logo: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png",
+        logo: "/tokens/dai.svg",
         address: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"
       },
       {
@@ -74,7 +74,7 @@ export default function Home() {
         priceChange24h: 1.87,
         volume24h: 890000000,
         marketCap: 10500000000,
-        logo: "https://cryptologos.cc/logos/wrapped-bitcoin-wbtc-logo.png",
+        logo: "/tokens/wbtc.svg",
         address: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"
       },
       {
@@ -85,7 +85,7 @@ export default function Home() {
         priceChange24h: -5.23,
         volume24h: 12000000,
         marketCap: 180000000,
-        logo: "https://aerodrome.finance/aero-token.svg",
+        logo: "/tokens/aero.svg",
         address: "0x940181a94A35A4569E4529A3CDfB74e38FD98631"
       },
       {
@@ -96,7 +96,7 @@ export default function Home() {
         priceChange24h: 8.45,
         volume24h: 5600000,
         marketCap: 230000000,
-        logo: "https://i.imgur.com/8QZQZQZ.png",
+        logo: "/tokens/brett.svg",
         address: "0x532fC0C4A6c3e7F3B2B2B2B2B2B2B2B2B2B2B2B2"
       }
     ];
@@ -177,7 +177,11 @@ export default function Home() {
                     alt={token.name} 
                     width={48}
                     height={48}
-                    className={styles.tokenLogo} 
+                    className={styles.tokenLogo}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/tokens/default.svg';
+                    }}
                   />
                   <div className={styles.tokenInfo}>
                     <h3 className={styles.tokenName}>{token.name}</h3>
