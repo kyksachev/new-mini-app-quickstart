@@ -15,8 +15,8 @@ export const minikitConfig = {
   },
   miniapp: {
     version: "1",
-    name: "Cubey", 
-    subtitle: "Your AI Ad Companion", 
+    name: "Simple Finance", 
+    subtitle: "Your Finance Companion", 
     description: "Ads",
     screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
     iconUrl: `${ROOT_URL}/blue-icon.png`,
