@@ -53,7 +53,7 @@ export default function WalletConnect({ onWalletConnected, onWalletDisconnected 
     return null;
   }
 
-  const handleConnect = (connector: any) => {
+  const handleConnect = (connector: typeof connectors[0]) => {
     connect({ connector });
   };
 

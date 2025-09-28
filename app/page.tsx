@@ -23,7 +23,7 @@ export default function Home() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [_walletAddress, setWalletAddress] = useState<string | null>(null);
 
   // Initialize the miniapp
   useEffect(() => {
