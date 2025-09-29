@@ -11,6 +11,7 @@ type Article = {
   summary: string;
   tags?: string[];
   image?: string; // remote image URL from the source
+  thumb: string;  // local thumbnail path in /public/news
 };
 
 const articles: Article[] = [
@@ -23,6 +24,7 @@ const articles: Article[] = [
       "Base introduced a security council with multiple independent orgs and advanced its decentralization roadmap, lowering governance risk for builders and users.",
     tags: ["Base", "Governance", "Decentralization"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
+    thumb: "/news/1.svg",
   },
   {
     title: "Flashblocks planned for Base to turbocharge confirmations",
@@ -33,6 +35,7 @@ const articles: Article[] = [
       "Flashblocks propose partial blocks streamed up to 5x per second, enabling near-instant confirmations, boosting UX for DeFi, games, and payments on Base.",
     tags: ["Base", "Performance", "Flashblocks"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
+    thumb: "/news/2.svg",
   },
   {
     title: '“Base is for everyone” token surges to $17M cap, then plunges 95%',
@@ -43,6 +46,7 @@ const articles: Article[] = [
       "An experimental community token on Base spiked on launch hype before collapsing. Base reiterated it was not an official network token.",
     tags: ["Tokens", "Volatility", "Community"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
+    thumb: "/news/3.svg",
   },
   {
     title: "Temporary deposit/withdrawal suspensions for select tokens (May 7)",
@@ -53,6 +57,7 @@ const articles: Article[] = [
       "Binance announced temporary maintenance-related suspensions for certain assets. Users were advised to check updated schedules before moving funds.",
     tags: ["Exchanges", "Maintenance"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
+    thumb: "/news/4.svg",
   },
   {
     title: "Base experiences brief block production halt (19 minutes)",
@@ -63,6 +68,7 @@ const articles: Article[] = [
       "A short outage paused block production. Services resumed after mitigation. Incident sparked discussion on L2 resiliency and monitoring.",
     tags: ["Outage", "Reliability", "L2"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
+    thumb: "/news/5.svg",
   },
 ];
 
@@ -155,7 +161,7 @@ export default function NewsPage() {
         >
           <div style={{ position: "relative", height: 300 }}>
             <Image
-              src={`/news/${articles.indexOf(featured) + 1}.svg`}
+              src={featured.thumb}
               alt={featured.title}
               fill
               sizes="(max-width: 768px) 100vw, 1200px"
@@ -203,7 +209,7 @@ export default function NewsPage() {
           >
             <div style={{ position: "relative" }}>
               <Image
-                src={`/news/${articles.indexOf(a) + 1}.svg`}
+                src={a.thumb}
                 alt={a.title}
                 width={600}
                 height={315}
