@@ -217,7 +217,7 @@ export default function NewsPage() {
               minHeight: 200,
             }}
           >
-            <div style={{ position: "relative" }}>
+            <div style={{ position: "relative", background: "rgba(255,255,255,0.02)" }}>
               <Image
                 src={a.thumb}
                 alt={a.title}
@@ -226,6 +226,20 @@ export default function NewsPage() {
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 priority={articles.indexOf(a) < 2}
               />
+              {/* Overlay small fallback if image fails to render in some clients */}
+              <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+                <Image
+                  src={
+                    a.domain === "rbc.ru"
+                      ? "/news/sources/rbc.svg"
+                      : a.thumb
+                  }
+                  alt="fallback"
+                  width={1}
+                  height={1}
+                  style={{ opacity: 0, width: 1, height: 1 }}
+                />
+              </div>
             </div>
             <div style={{ padding: "1rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: ".5rem" }}>
