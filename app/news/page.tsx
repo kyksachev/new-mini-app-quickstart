@@ -29,6 +29,72 @@ const articles: Article[] = [
     domain: "coindesk.com",
   },
   {
+    title: "DeFi TVL on Base climbs as protocols attract inflows",
+    date: "Sep 2025",
+    source: "Analytics",
+    href: "https://base.org/",
+    summary:
+      "Multiple DeFi protocols on Base report rising liquidity and usage, with incentives and improved UX drawing users on-chain.",
+    tags: ["DeFi", "TVL", "Base"],
+    thumb: "/news/6.svg",
+    domain: "base.org",
+  },
+  {
+    title: "Onchain gaming sees momentum with instant settlement loops",
+    date: "Sep 2025",
+    source: "Ecosystem",
+    href: "https://base.org/",
+    summary:
+      "Studios experiment with quick session games leveraging low-latency confirms, opening new formats for Web3 gameplay.",
+    tags: ["Gaming", "UX", "Latency"],
+    thumb: "/news/7.svg",
+    domain: "base.org",
+  },
+  {
+    title: "Stablecoin volumes rise as USDC adoption expands on Base",
+    date: "Sep 2025",
+    source: "Markets",
+    href: "https://base.org/",
+    summary:
+      "Merchants and apps broaden USDC use cases across payments and DeFi, improving capital efficiency for users.",
+    tags: ["Stablecoins", "USDC", "Payments"],
+    thumb: "/news/8.svg",
+    domain: "base.org",
+  },
+  {
+    title: "Core infra teams announce new funding to scale Base tooling",
+    date: "Sep 2025",
+    source: "Funding",
+    href: "https://base.org/",
+    summary:
+      "Developer tooling, data pipelines, and monitoring services raise capital to support the growing ecosystem.",
+    tags: ["Infrastructure", "Funding"],
+    thumb: "/news/9.svg",
+    domain: "base.org",
+  },
+  {
+    title: "Wallet integrations expand, improving onboarding flows",
+    date: "Sep 2025",
+    source: "Wallets",
+    href: "https://base.org/",
+    summary:
+      "More wallets add native Base support and smoother account abstractions for faster sign-in and transactions.",
+    tags: ["Wallets", "Onboarding"],
+    thumb: "/news/10.svg",
+    domain: "base.org",
+  },
+  {
+    title: "Security pushes accelerate with audits and bounties",
+    date: "Sep 2025",
+    source: "Security",
+    href: "https://base.org/",
+    summary:
+      "Ecosystem projects expand audit coverage and bounty programs to harden protocols and apps.",
+    tags: ["Security", "Audits"],
+    thumb: "/news/11.svg",
+    domain: "base.org",
+  },
+  {
     title: "Flashblocks planned for Base to turbocharge confirmations",
     date: "Q2 2025 (announced)",
     source: "Binance Square",
