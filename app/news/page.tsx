@@ -22,7 +22,7 @@ const articles: Article[] = [
     summary:
       "Base introduced a security council with multiple independent orgs and advanced its decentralization roadmap, lowering governance risk for builders and users.",
     tags: ["Base", "Governance", "Decentralization"],
-    image: "https://www.coindesk.com/resizer/v2/arc-photo-coindesk/2024/11/20/example.jpg", // illustrative
+    // image: remote source image (disabled to ensure reliable local thumbnails)
   },
   {
     title: "Flashblocks planned for Base to turbocharge confirmations",
@@ -32,7 +32,7 @@ const articles: Article[] = [
     summary:
       "Flashblocks propose partial blocks streamed up to 5x per second, enabling near-instant confirmations, boosting UX for DeFi, games, and payments on Base.",
     tags: ["Base", "Performance", "Flashblocks"],
-    image: "https://www.binance.com/resources/img/example-banner.png",
+    // image: remote source image (disabled to ensure reliable local thumbnails)
   },
   {
     title: '“Base is for everyone” token surges to $17M cap, then plunges 95%',
@@ -42,7 +42,7 @@ const articles: Article[] = [
     summary:
       "An experimental community token on Base spiked on launch hype before collapsing. Base reiterated it was not an official network token.",
     tags: ["Tokens", "Volatility", "Community"],
-    image: "https://s0.rbk.ru/v6_top_pics/media/img/0/67/756739090512670.jpeg",
+    // image: remote source image (disabled to ensure reliable local thumbnails)
   },
   {
     title: "Temporary deposit/withdrawal suspensions for select tokens (May 7)",
@@ -52,7 +52,7 @@ const articles: Article[] = [
     summary:
       "Binance announced temporary maintenance-related suspensions for certain assets. Users were advised to check updated schedules before moving funds.",
     tags: ["Exchanges", "Maintenance"],
-    image: "https://holder.io/_next/static/media/holder-cover.123456.jpg",
+    // image: remote source image (disabled to ensure reliable local thumbnails)
   },
   {
     title: "Base experiences brief block production halt (19 minutes)",
@@ -62,7 +62,7 @@ const articles: Article[] = [
     summary:
       "A short outage paused block production. Services resumed after mitigation. Incident sparked discussion on L2 resiliency and monitoring.",
     tags: ["Outage", "Reliability", "L2"],
-    image: "https://nft.ru/static/example-cover.png",
+    // image: remote source image (disabled to ensure reliable local thumbnails)
   },
 ];
 
@@ -154,25 +154,14 @@ export default function NewsPage() {
           }}
         >
           <div style={{ position: "relative", height: 300 }}>
-            {featured.image ? (
-              <Image
-                src={featured.image}
-                alt={featured.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 1200px"
-                style={{ objectFit: "cover" }}
-                priority
-              />
-            ) : (
-              <Image
-                src={`/news/${articles.indexOf(featured) + 1}.svg`}
-                alt={featured.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 1200px"
-                style={{ objectFit: "cover" }}
-                priority
-              />
-            )}
+            <Image
+              src={`/news/${articles.indexOf(featured) + 1}.svg`}
+              alt={featured.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 1200px"
+              style={{ objectFit: "cover" }}
+              priority
+            />
           </div>
           <div style={{ padding: "1rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: ".5rem" }}>
@@ -213,25 +202,14 @@ export default function NewsPage() {
             }}
           >
             <div style={{ position: "relative" }}>
-              {a.image ? (
-                <Image
-                  src={a.image}
-                  alt={a.title}
-                  width={600}
-                  height={315}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  priority={articles.indexOf(a) < 2}
-                />
-              ) : (
-                <Image
-                  src={`/news/${articles.indexOf(a) + 1}.svg`}
-                  alt={a.title}
-                  width={600}
-                  height={315}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  priority={articles.indexOf(a) < 2}
-                />
-              )}
+              <Image
+                src={`/news/${articles.indexOf(a) + 1}.svg`}
+                alt={a.title}
+                width={600}
+                height={315}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                priority={articles.indexOf(a) < 2}
+              />
             </div>
             <div style={{ padding: "1rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: ".5rem" }}>
