@@ -32,6 +32,8 @@ export default function SwapPage() {
   const [tokenIn, setTokenIn] = useState<Token>(TOKENS[1]); // USDC
   const [tokenOut, setTokenOut] = useState<Token>(TOKENS[0]); // WETH
   const [amountInRaw, setAmountInRaw] = useState("");
+  const [slippageBps, setSlippageBps] = useState<number>(DEFAULT_SLIPPAGE_BPS);
+  const [deadlineMin, setDeadlineMin] = useState<number>(20);
 
   function sanitizeDecimal(input: string): string {
     // Replace comma with dot, keep only digits and one dot
@@ -86,7 +88,7 @@ export default function SwapPage() {
     return amountOutGivenIn(amountIn, reserveIn, reserveOut, 30);
   }, [amountIn, reserveIn, reserveOut]);
 
-  const minOut = useMemo(() => quoteOut ? (quoteOut * BigInt(10000 - DEFAULT_SLIPPAGE_BPS)) / 10000n : 0n, [quoteOut]);
+  const minOut = useMemo(() => quoteOut ? (quoteOut * BigInt(10000 - slippageBps)) / 10000n : 0n, [quoteOut, slippageBps]);
 
   // allowance & approve
   const { data: allowance } = useReadContract({
@@ -117,7 +119,7 @@ export default function SwapPage() {
       address: ROUTER_ADDRESS as `0x${string}`,
       abi: V2_ROUTER_ABI,
       functionName: "swapExactTokensForTokens",
-      args: [amountIn, minOut, path, address, getDeadline()]
+      args: [amountIn, minOut, path, address, BigInt(Math.floor(Date.now() / 1000) + deadlineMin * 60)]
     });
   };
 
@@ -144,6 +146,24 @@ export default function SwapPage() {
 
         <div style={{ fontSize: ".9rem", opacity: .8 }}>
           Min received: {minOut ? formatUnits(minOut, tokenOut.decimals) : "-"}
+        </div>
+
+        <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
+          <div>
+            Slippage:
+            {[10, 50, 100].map(v => (
+              <button key={v} onClick={() => setSlippageBps(v)} style={{ marginLeft: 6, border: `1px solid ${slippageBps===v?"#00d4ff":"var(--border)"}`, background: slippageBps===v?"rgba(0,212,255,.1)":"transparent", color: slippageBps===v?"#00d4ff":"#fff", borderRadius: 8, padding: ".2rem .5rem" }}>{v/100}%</button>
+            ))}
+            <input value={(slippageBps/100).toString()} onChange={e=>{
+              const num = Number(e.target.value.replace(",","."));
+              if (!Number.isFinite(num) || num<0 || num>50) return; // 0..50%
+              setSlippageBps(Math.round(num*100));
+            }} style={{ width: 60, marginLeft: 8 }} />%
+          </div>
+          <div>
+            Deadline:
+            <input value={deadlineMin} onChange={e=>{ const n = Number(e.target.value); if(Number.isFinite(n) && n>0 && n<120){ setDeadlineMin(n);} }} style={{ width: 60, marginLeft: 6 }} /> min
+          </div>
         </div>
 
         {!address && <div>Please connect wallet</div>}
