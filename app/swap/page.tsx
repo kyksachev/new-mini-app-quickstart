@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { useAccount, useBalance, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useMemo, useState } from "react";
+import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { erc20Abi, parseUnits, formatUnits } from "viem";
-import { FACTORY_ADDRESS, ROUTER_ADDRESS, WETH_ADDRESS, DEFAULT_SLIPPAGE_BPS, getDeadline } from "../../lib/swap/config";
+import { FACTORY_ADDRESS, ROUTER_ADDRESS, DEFAULT_SLIPPAGE_BPS, getDeadline } from "../../lib/swap/config";
 import { TOKENS, Token } from "../../lib/swap/tokens";
 
 const V2_FACTORY_ABI = [{
@@ -51,12 +51,14 @@ export default function SwapPage() {
     query: { enabled: !!pairAddr }
   });
 
+  type Reserves = readonly [bigint, bigint, number];
   const [reserveIn, reserveOut] = useMemo(() => {
-    if (!reserves) return [0n, 0n] as const;
+    const tuple = reserves as Reserves | undefined;
+    if (!tuple) return [0n, 0n] as const;
     // Assume token ordering by address to match pair's token0/token1; for MVP we just map by lexical order
     const token0IsIn = tokenIn.address.toLowerCase() < tokenOut.address.toLowerCase();
-    const r0 = BigInt((reserves as any)[0] || 0);
-    const r1 = BigInt((reserves as any)[1] || 0);
+    const r0 = tuple[0] ?? 0n;
+    const r1 = tuple[1] ?? 0n;
     return token0IsIn ? [r0, r1] as const : [r1, r0] as const;
   }, [reserves, tokenIn.address, tokenOut.address]);
 
@@ -76,7 +78,10 @@ export default function SwapPage() {
     query: { enabled: !!address && !!ROUTER_ADDRESS }
   });
 
-  const needsApprove = useMemo(() => !!amountIn && (BigInt(allowance as any || 0) < amountIn), [allowance, amountIn]);
+  const needsApprove = useMemo(() => {
+    const allowanceValue: bigint = (allowance as bigint) ?? 0n;
+    return !!amountIn && allowanceValue < amountIn;
+  }, [allowance, amountIn]);
 
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
