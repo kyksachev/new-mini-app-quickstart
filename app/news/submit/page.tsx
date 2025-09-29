@@ -22,8 +22,9 @@ export default function SubmitNewsPage() {
       if (!res.ok) throw new Error(data.error || "Failed");
       setStatus("Submitted! Pending admin review.");
       setTitle(""); setHref(""); setSource(""); setSummary(""); setTags("");
-    } catch (err: any) {
-      setStatus(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unexpected error";
+      setStatus(message);
     }
   };
 
