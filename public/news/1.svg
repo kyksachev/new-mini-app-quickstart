@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#0f0f23" offset="0"/>
+      <stop stop-color="#1a1a2e" offset="0.5"/>
+      <stop stop-color="#16213e" offset="1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <circle cx="980" cy="120" r="220" fill="#00d4ff" opacity="0.15"/>
+  <text x="60" y="140" font-size="56" font-family="Arial,Helvetica,sans-serif" fill="#fff" font-weight="700">Base reaches Stage 1</text>
+  <text x="60" y="210" font-size="32" font-family="Arial,Helvetica,sans-serif" fill="#9cc9ff">Decentralization milestone and security council</text>
+</svg>
+

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 
 type Article = {
   title: string;
@@ -67,19 +68,34 @@ export default function NewsPage() {
             style={{
               border: "1px solid var(--border)",
               borderRadius: 12,
-              padding: "1rem",
+              overflow: "hidden",
               background: "var(--card-bg)",
+              display: "grid",
+              gridTemplateColumns: "minmax(220px, 32%) 1fr",
+              minHeight: 200,
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: ".5rem" }}>
-              <h3 style={{ margin: 0 }}>{a.title}</h3>
-              <span style={{ opacity: 0.6, whiteSpace: "nowrap" }}>{a.date}</span>
+            <div style={{ position: "relative" }}>
+              <Image
+                src={`/news/${articles.indexOf(a) + 1}.svg`}
+                alt={a.title}
+                width={600}
+                height={315}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                priority={articles.indexOf(a) < 2}
+              />
             </div>
-            <p style={{ marginTop: ".5rem", opacity: 0.9 }}>{a.summary}</p>
-            <div style={{ marginTop: ".5rem", display: "flex", gap: ".75rem" }}>
-              <Link href={a.href} target="_blank" rel="noreferrer">
-                Read source ({a.source}) →
-              </Link>
+            <div style={{ padding: "1rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: ".5rem" }}>
+                <h3 style={{ margin: 0 }}>{a.title}</h3>
+                <span style={{ opacity: 0.6, whiteSpace: "nowrap" }}>{a.date}</span>
+              </div>
+              <p style={{ marginTop: ".5rem", opacity: 0.9 }}>{a.summary}</p>
+              <div style={{ marginTop: ".5rem", display: "flex", gap: ".75rem" }}>
+                <Link href={a.href} target="_blank" rel="noreferrer">
+                  Read source ({a.source}) →
+                </Link>
+              </div>
             </div>
           </article>
         ))}
