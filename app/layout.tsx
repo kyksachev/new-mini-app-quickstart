@@ -56,6 +56,7 @@ export default function RootLayout({
                 <nav className="nav">
                   <Link className="nav-link" href="/">Home</Link>
                   <Link className="nav-link" href="/tokens">Tokens</Link>
+                  <Link className="nav-link" href="/swap">Swap</Link>
                   <Link className="nav-link" href="/news">News</Link>
                   <Link className="nav-link" href="/about">About</Link>
                 </nav>
