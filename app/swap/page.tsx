@@ -32,7 +32,26 @@ export default function SwapPage() {
   const [tokenIn, setTokenIn] = useState<Token>(TOKENS[1]); // USDC
   const [tokenOut, setTokenOut] = useState<Token>(TOKENS[0]); // WETH
   const [amountInRaw, setAmountInRaw] = useState("");
-  const amountIn = useMemo(() => amountInRaw ? parseUnits(amountInRaw || "0", tokenIn.decimals) : 0n, [amountInRaw, tokenIn.decimals]);
+
+  function sanitizeDecimal(input: string): string {
+    // Replace comma with dot, keep only digits and one dot
+    let s = (input || "").replace(/,/g, ".").replace(/[^0-9.]/g, "");
+    const parts = s.split(".");
+    if (parts.length > 2) {
+      s = parts.shift() + "." + parts.join("");
+    }
+    return s;
+  }
+
+  const amountIn = useMemo(() => {
+    const clean = sanitizeDecimal(amountInRaw);
+    if (!clean) return 0n;
+    try {
+      return parseUnits(clean, tokenIn.decimals);
+    } catch {
+      return 0n;
+    }
+  }, [amountInRaw, tokenIn.decimals]);
 
   // getPair
   const { data: pairAddr } = useReadContract({
@@ -111,7 +130,7 @@ export default function SwapPage() {
             <select value={tokenIn.symbol} onChange={e => setTokenIn(TOKENS.find(t => t.symbol === e.target.value) || TOKENS[0])}>
               {TOKENS.map(t => <option key={t.address} value={t.symbol}>{t.symbol}</option>)}
             </select>
-            <input value={amountInRaw} onChange={e => setAmountInRaw(e.target.value)} placeholder="0.0" style={{ flex: 1 }} />
+            <input value={amountInRaw} onChange={e => setAmountInRaw(sanitizeDecimal(e.target.value))} placeholder="0.0" style={{ flex: 1 }} />
           </div>
         </div>
         <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: ".75rem" }}>
