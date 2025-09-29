@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { erc20Abi, parseUnits, formatUnits } from "viem";
-import { FACTORY_ADDRESS, ROUTER_ADDRESS, DEFAULT_SLIPPAGE_BPS, getDeadline } from "../../lib/swap/config";
+import { FACTORY_ADDRESS, ROUTER_ADDRESS, DEFAULT_SLIPPAGE_BPS } from "../../lib/swap/config";
 import { TOKENS, Token } from "../../lib/swap/tokens";
 
 const V2_FACTORY_ABI = [{
