@@ -3,6 +3,8 @@ import { Inter, Source_Code_Pro } from "next/font/google";
 import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { minikitConfig } from "../minikit.config";
 import { RootProvider } from "./rootProvider";
+import Link from "next/link";
+import Image from "next/image";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -47,15 +49,15 @@ export default function RootLayout({
           <SafeArea>
             <header className="site-header">
               <div className="container header-inner">
-                <a href="/" className="brand">
-                  <img src="/blue-icon.png" alt="Logo" className="brand-logo" />
-                  <span className="brand-name">{/** keep dynamic name via metadata title */}</span>
-                </a>
+                <Link href="/" className="brand">
+                  <Image src="/blue-icon.png" alt="Logo" className="brand-logo" width={28} height={28} />
+                  <span className="brand-name"></span>
+                </Link>
                 <nav className="nav">
-                  <a className="nav-link" href="/">Home</a>
-                  <a className="nav-link" href="/tokens">Tokens</a>
-                  <a className="nav-link" href="/news">News</a>
-                  <a className="nav-link" href="/about">About</a>
+                  <Link className="nav-link" href="/">Home</Link>
+                  <Link className="nav-link" href="/tokens">Tokens</Link>
+                  <Link className="nav-link" href="/news">News</Link>
+                  <Link className="nav-link" href="/about">About</Link>
                 </nav>
               </div>
             </header>
