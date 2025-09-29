@@ -13,6 +13,17 @@ type PendingItem = {
   status: "pending";
 };
 
+type PublishedItem = {
+  title: string;
+  date: string;
+  source: string;
+  href: string;
+  summary: string;
+  tags: string[];
+  thumb: string;
+  domain: string;
+};
+
 const DATA_DIR = path.join(process.cwd(), "data");
 const PENDING_PATH = path.join(DATA_DIR, "news-pending.json");
 const PUBLISHED_PATH = path.join(DATA_DIR, "news-published.json");
@@ -43,7 +54,7 @@ export async function POST(req: NextRequest) {
   const [item] = pending.splice(idx, 1);
 
   if (action === "approve") {
-    const published: any[] = JSON.parse(await fs.readFile(PUBLISHED_PATH, "utf8"));
+    const published: PublishedItem[] = JSON.parse(await fs.readFile(PUBLISHED_PATH, "utf8"));
     published.unshift({
       title: item.title,
       date: new Date(item.date).toDateString(),
