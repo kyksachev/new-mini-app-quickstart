@@ -44,7 +44,32 @@ export default function RootLayout({
     <RootProvider>
       <html lang="en">
         <body className={`${inter.variable} ${sourceCodePro.variable}`}>
-          <SafeArea>{children}</SafeArea>
+          <SafeArea>
+            <header className="site-header">
+              <div className="container header-inner">
+                <a href="/" className="brand">
+                  <img src="/blue-icon.png" alt="Logo" className="brand-logo" />
+                  <span className="brand-name">{/** keep dynamic name via metadata title */}</span>
+                </a>
+                <nav className="nav">
+                  <a className="nav-link" href="/">Home</a>
+                  <a className="nav-link" href="/tokens">Tokens</a>
+                  <a className="nav-link" href="/news">News</a>
+                  <a className="nav-link" href="/about">About</a>
+                </nav>
+              </div>
+            </header>
+            <main className="container page-content">{children}</main>
+            <footer className="site-footer">
+              <div className="container footer-inner">
+                <span>© {new Date().getFullYear()} Simple Finance</span>
+                <div className="footer-links">
+                  <a href="https://base.org" target="_blank" rel="noreferrer">Built on Base</a>
+                  <a href="https://warpcast.com/" target="_blank" rel="noreferrer">Farcaster</a>
+                </div>
+              </div>
+            </footer>
+          </SafeArea>
         </body>
       </html>
     </RootProvider>
