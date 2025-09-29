@@ -12,6 +12,7 @@ type Article = {
   tags?: string[];
   image?: string; // remote image URL from the source
   thumb: string;  // local thumbnail path in /public/news
+  domain: string; // source domain for favicon
 };
 
 const articles: Article[] = [
@@ -25,6 +26,7 @@ const articles: Article[] = [
     tags: ["Base", "Governance", "Decentralization"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
     thumb: "/news/1.svg",
+    domain: "coindesk.com",
   },
   {
     title: "Flashblocks planned for Base to turbocharge confirmations",
@@ -36,6 +38,7 @@ const articles: Article[] = [
     tags: ["Base", "Performance", "Flashblocks"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
     thumb: "/news/2.svg",
+    domain: "binance.com",
   },
   {
     title: '“Base is for everyone” token surges to $17M cap, then plunges 95%',
@@ -47,6 +50,7 @@ const articles: Article[] = [
     tags: ["Tokens", "Volatility", "Community"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
     thumb: "/news/3.svg",
+    domain: "rbc.ru",
   },
   {
     title: "Temporary deposit/withdrawal suspensions for select tokens (May 7)",
@@ -58,6 +62,7 @@ const articles: Article[] = [
     tags: ["Exchanges", "Maintenance"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
     thumb: "/news/4.svg",
+    domain: "holder.io",
   },
   {
     title: "Base experiences brief block production halt (19 minutes)",
@@ -69,6 +74,7 @@ const articles: Article[] = [
     tags: ["Outage", "Reliability", "L2"],
     // image: remote source image (disabled to ensure reliable local thumbnails)
     thumb: "/news/5.svg",
+    domain: "nft.ru",
   },
 ];
 
@@ -174,6 +180,10 @@ export default function NewsPage() {
               <h2 style={{ margin: 0 }}>{featured.title}</h2>
               <span style={{ opacity: 0.6, whiteSpace: "nowrap" }}>{featured.date}</span>
             </div>
+            <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginTop: ".35rem" }}>
+              <Image src={`https://www.google.com/s2/favicons?domain=${featured.domain}&sz=64`} alt={featured.source} width={16} height={16} />
+              <span style={{ opacity: .75, fontSize: ".9rem" }}>{featured.source}</span>
+            </div>
             <p style={{ marginTop: ".5rem", opacity: 0.9 }}>{featured.summary}</p>
             <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
               {(featured.tags || []).map(t => (
@@ -221,6 +231,10 @@ export default function NewsPage() {
               <div style={{ display: "flex", justifyContent: "space-between", gap: ".5rem" }}>
                 <h3 style={{ margin: 0 }}>{a.title}</h3>
                 <span style={{ opacity: 0.6, whiteSpace: "nowrap" }}>{a.date}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
+                <Image src={`https://www.google.com/s2/favicons?domain=${a.domain}&sz=64`} alt={a.source} width={14} height={14} />
+                <span style={{ opacity: .7, fontSize: ".85rem" }}>{a.source}</span>
               </div>
               <p style={{ marginTop: ".5rem", opacity: 0.9 }}>{a.summary}</p>
               <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
