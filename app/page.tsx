@@ -32,75 +32,19 @@ export default function Home() {
     }
   }, [setFrameReady, isFrameReady]);
 
-  // Mock data for Base tokens - in real app, you'd fetch from API
+  // Mock data for Farcaster Top 10 tokens - in real app, fetch from API
   useEffect(() => {
     const mockTokens: Token[] = [
-      {
-        id: "1",
-        name: "Ethereum",
-        symbol: "ETH",
-        price: 3245.67,
-        priceChange24h: 2.34,
-        volume24h: 15420000000,
-        marketCap: 390000000000,
-        logo: "/tokens/eth.svg",
-        address: "0x0000000000000000000000000000000000000000"
-      },
-      {
-        id: "2",
-        name: "USD Coin",
-        symbol: "USDC",
-        price: 1.00,
-        priceChange24h: 0.01,
-        volume24h: 3200000000,
-        marketCap: 32000000000,
-        logo: "/tokens/usdc.svg",
-        address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-      },
-      {
-        id: "3",
-        name: "Dai Stablecoin",
-        symbol: "DAI",
-        price: 1.00,
-        priceChange24h: -0.02,
-        volume24h: 450000000,
-        marketCap: 5400000000,
-        logo: "/tokens/dai.svg",
-        address: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"
-      },
-      {
-        id: "4",
-        name: "Wrapped Bitcoin",
-        symbol: "WBTC",
-        price: 67543.21,
-        priceChange24h: 1.87,
-        volume24h: 890000000,
-        marketCap: 10500000000,
-        logo: "/tokens/wbtc.svg",
-        address: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"
-      },
-      {
-        id: "5",
-        name: "Aerodrome Finance",
-        symbol: "AERO",
-        price: 0.45,
-        priceChange24h: -5.23,
-        volume24h: 12000000,
-        marketCap: 180000000,
-        logo: "/tokens/aero.svg",
-        address: "0x940181a94A35A4569E4529A3CDfB74e38FD98631"
-      },
-      {
-        id: "6",
-        name: "Brett",
-        symbol: "BRETT",
-        price: 0.0234,
-        priceChange24h: 8.45,
-        volume24h: 5600000,
-        marketCap: 230000000,
-        logo: "/tokens/brett.svg",
-        address: "0x532fC0C4A6c3e7F3B2B2B2B2B2B2B2B2B2B2B2B2"
-      }
+      { id: "1", name: "DEGEN", symbol: "DEGEN", price: 0.0423, priceChange24h: 3.25, volume24h: 8200000, marketCap: 580000000, logo: "/tokens/degen.svg", address: "0x0000000000000000000000000000000000000001" },
+      { id: "2", name: "Farcaster", symbol: "FRC", price: 2.13, priceChange24h: -1.12, volume24h: 4200000, marketCap: 210000000, logo: "/tokens/farcaster.svg", address: "0x0000000000000000000000000000000000000002" },
+      { id: "3", name: "Warpcast", symbol: "WARP", price: 1.24, priceChange24h: 5.18, volume24h: 2600000, marketCap: 98000000, logo: "/tokens/warpcast.svg", address: "0x0000000000000000000000000000000000000003" },
+      { id: "4", name: "Frames", symbol: "FRAME", price: 0.87, priceChange24h: -2.75, volume24h: 1400000, marketCap: 65000000, logo: "/tokens/frames.svg", address: "0x0000000000000000000000000000000000000004" },
+      { id: "5", name: "Points", symbol: "POINTS", price: 0.34, priceChange24h: 1.05, volume24h: 980000, marketCap: 42000000, logo: "/tokens/points.svg", address: "0x0000000000000000000000000000000000000005" },
+      { id: "6", name: "Cast", symbol: "CAST", price: 0.56, priceChange24h: 0.82, volume24h: 730000, marketCap: 38000000, logo: "/tokens/cast.svg", address: "0x0000000000000000000000000000000000000006" },
+      { id: "7", name: "Warp", symbol: "WRP", price: 0.19, priceChange24h: -0.45, volume24h: 510000, marketCap: 22000000, logo: "/tokens/warp.svg", address: "0x0000000000000000000000000000000000000007" },
+      { id: "8", name: "Chan", symbol: "CHAN", price: 0.92, priceChange24h: 6.12, volume24h: 1250000, marketCap: 56000000, logo: "/tokens/chan.svg", address: "0x0000000000000000000000000000000000000008" },
+      { id: "9", name: "Castaway", symbol: "CSTWY", price: 0.12, priceChange24h: 2.03, volume24h: 310000, marketCap: 15000000, logo: "/tokens/castaway.svg", address: "0x0000000000000000000000000000000000000009" },
+      { id: "10", name: "Purple", symbol: "PURP", price: 3.45, priceChange24h: -1.98, volume24h: 2100000, marketCap: 120000000, logo: "/tokens/purple.svg", address: "0x0000000000000000000000000000000000000010" },
     ];
 
     // Simulate API loading
