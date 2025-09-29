@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Article = {
   title: string;
@@ -154,14 +154,27 @@ export default function NewsPage() {
     return Array.from(s).sort();
   }, []);
 
+  const [remote, setRemote] = useState<Article[]>([]);
+
+  useEffect(() => {
+    fetch("/api/news/published").then(r => r.json()).then(d => {
+      if (Array.isArray(d?.published)) setRemote(d.published as Article[]);
+    }).catch(() => {});
+  }, []);
+
+  const combined = useMemo(() => {
+    // Merge remote (approved) on top of static articles
+    return [...remote, ...articles];
+  }, [remote]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return articles.filter(a => {
+    return combined.filter(a => {
       const matchesQuery = !q || a.title.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q) || a.source.toLowerCase().includes(q);
       const matchesTag = !activeTag || (a.tags?.includes(activeTag));
       return matchesQuery && matchesTag;
     });
-  }, [query, activeTag]);
+  }, [query, activeTag, combined]);
 
   const [featured, ...rest] = filtered;
 
