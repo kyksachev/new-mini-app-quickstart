@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { erc20Abi, parseUnits, formatUnits } from "viem";
-import { FACTORY_ADDRESS, ROUTER_ADDRESS, DEFAULT_SLIPPAGE_BPS, V3_QUOTER_ADDRESS, V3_ROUTER_ADDRESS, V3_FEE_DEFAULT } from "../../lib/swap/config";
+import { FACTORY_ADDRESS, ROUTER_ADDRESS, DEFAULT_SLIPPAGE_BPS, V3_QUOTER_ADDRESS, V3_ROUTER_ADDRESS, V3_FEE_DEFAULT, WETH_ADDRESS } from "../../lib/swap/config";
 import { TOKENS, Token } from "../../lib/swap/tokens";
 
 const V2_FACTORY_ABI = [{
@@ -84,6 +84,34 @@ export default function SwapPage() {
     query: { enabled: !!pairAddr }
   });
 
+  // v2 hop via WETH
+  const { data: pairInWeth } = useReadContract({
+    address: FACTORY_ADDRESS as `0x${string}`,
+    abi: V2_FACTORY_ABI,
+    functionName: "getPair",
+    args: [tokenIn.address, WETH_ADDRESS as `0x${string}`],
+    query: { enabled: !!FACTORY_ADDRESS && !!WETH_ADDRESS }
+  });
+  const { data: reservesInWeth } = useReadContract({
+    address: (pairInWeth as `0x${string}`) || undefined,
+    abi: V2_PAIR_ABI,
+    functionName: "getReserves",
+    query: { enabled: !!pairInWeth }
+  });
+  const { data: pairWethOut } = useReadContract({
+    address: FACTORY_ADDRESS as `0x${string}`,
+    abi: V2_FACTORY_ABI,
+    functionName: "getPair",
+    args: [WETH_ADDRESS as `0x${string}`, tokenOut.address],
+    query: { enabled: !!FACTORY_ADDRESS && !!WETH_ADDRESS }
+  });
+  const { data: reservesWethOut } = useReadContract({
+    address: (pairWethOut as `0x${string}`) || undefined,
+    abi: V2_PAIR_ABI,
+    functionName: "getReserves",
+    query: { enabled: !!pairWethOut }
+  });
+
   type Reserves = readonly [bigint, bigint, number];
   const [reserveIn, reserveOut] = useMemo(() => {
     const tuple = reserves as Reserves | undefined;
@@ -95,11 +123,36 @@ export default function SwapPage() {
     return token0IsIn ? [r0, r1] as const : [r1, r0] as const;
   }, [reserves, tokenIn.address, tokenOut.address]);
 
+  const hopReserves1 = useMemo(() => {
+    const t = reservesInWeth as Reserves | undefined;
+    if (!t) return [0n, 0n] as const;
+    const token0IsIn = tokenIn.address.toLowerCase() < (WETH_ADDRESS as string).toLowerCase();
+    const r0 = t[0] ?? 0n;
+    const r1 = t[1] ?? 0n;
+    return token0IsIn ? [r0, r1] as const : [r1, r0] as const;
+  }, [reservesInWeth, tokenIn.address]);
+  const hopReserves2 = useMemo(() => {
+    const t = reservesWethOut as Reserves | undefined;
+    if (!t) return [0n, 0n] as const;
+    const token0IsIn = (WETH_ADDRESS as string).toLowerCase() < tokenOut.address.toLowerCase();
+    const r0 = t[0] ?? 0n;
+    const r1 = t[1] ?? 0n;
+    return token0IsIn ? [r0, r1] as const : [r1, r0] as const;
+  }, [reservesWethOut, tokenOut.address]);
+
   // v2 quote (direct pair). Will be used if no v3 quoter configured
   const v2Quote = useMemo(() => {
     if (!amountIn || !reserveIn || !reserveOut) return 0n;
     return amountOutGivenIn(amountIn, reserveIn, reserveOut, 30);
   }, [amountIn, reserveIn, reserveOut]);
+
+  const v2QuoteHop = useMemo(() => {
+    if (!amountIn || !hopReserves1[0] || !hopReserves1[1] || !hopReserves2[0] || !hopReserves2[1]) return 0n;
+    const out1 = amountOutGivenIn(amountIn, hopReserves1[0], hopReserves1[1], 30);
+    if (!out1) return 0n;
+    const out2 = amountOutGivenIn(out1, hopReserves2[0], hopReserves2[1], 30);
+    return out2;
+  }, [amountIn, hopReserves1, hopReserves2]);
 
   // v3 quote via Quoter (single pool, default fee)
   const { data: v3QuoteData } = useReadContract({
@@ -157,7 +210,8 @@ export default function SwapPage() {
         args: [{ tokenIn: tokenIn.address, tokenOut: tokenOut.address, fee: V3_FEE_DEFAULT, recipient: address, deadline, amountIn, amountOutMinimum: minOut, sqrtPriceLimitX96: 0n } as any]
       });
     } else {
-      const path = [tokenIn.address, tokenOut.address];
+      const useHop = v2QuoteHop > v2Quote;
+      const path = useHop ? [tokenIn.address, WETH_ADDRESS as `0x${string}`, tokenOut.address] : [tokenIn.address, tokenOut.address];
       writeContract({
         address: ROUTER_ADDRESS as `0x${string}`,
         abi: V2_ROUTER_ABI,
