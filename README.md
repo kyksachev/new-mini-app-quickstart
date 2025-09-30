@@ -1,3 +1,15 @@
+## Swap (Uniswap integration)
+
+Defaults (Base chain) are pre-configured:
+
+```
+NEXT_PUBLIC_UNISWAP_V3_ROUTER_ADDRESS=0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45
+NEXT_PUBLIC_UNISWAP_V3_QUOTER_ADDRESS=0x61fFE014bA17989E743c5F6cB21bF9697530B21e
+NEXT_PUBLIC_BASE_WETH_ADDRESS=0x4200000000000000000000000000000000000006
+```
+
+You can override via `.env.local`. If v3 env is present, /swap uses Uniswap v3 (Quoter + SwapRouter); otherwise it falls back to v2.
+
 # Waitlist Mini App Quickstart
 
 This is a demo Mini App application built using OnchainKit and the Farcaster SDK. Build a waitlist sign-up mini app for your company that can be published to the Base app and Farcaster.

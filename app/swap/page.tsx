@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { erc20Abi, parseUnits, formatUnits } from "viem";
-import { FACTORY_ADDRESS, ROUTER_ADDRESS, DEFAULT_SLIPPAGE_BPS } from "../../lib/swap/config";
+import { FACTORY_ADDRESS, ROUTER_ADDRESS, DEFAULT_SLIPPAGE_BPS, V3_QUOTER_ADDRESS, V3_ROUTER_ADDRESS, V3_FEE_DEFAULT, WETH_ADDRESS } from "../../lib/swap/config";
 import { TOKENS, Token } from "../../lib/swap/tokens";
 
 const V2_FACTORY_ABI = [{
@@ -16,6 +16,18 @@ const V2_PAIR_ABI = [{
 
 const V2_ROUTER_ABI = [
   {"inputs":[{"internalType":"uint256","name":"amountIn","type":"uint256"},{"internalType":"uint256","name":"amountOutMin","type":"uint256"},{"internalType":"address[]","name":"path","type":"address[]"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"swapExactTokensForTokens","outputs":[{"internalType":"uint256[]","name":"amounts","type":"uint256[]"}],"stateMutability":"nonpayable","type":"function"}
+];
+
+// Uniswap v3 minimal ABIs
+const V3_QUOTER_ABI = [
+  // Quoter V2: returns tuple
+  { "type":"function","stateMutability":"nonpayable","name":"quoteExactInputSingle","inputs":[{"name":"params","type":"tuple","components":[{"name":"tokenIn","type":"address"},{"name":"tokenOut","type":"address"},{"name":"fee","type":"uint24"},{"name":"amountIn","type":"uint256"},{"name":"sqrtPriceLimitX96","type":"uint160"}]}],"outputs":[{"name":"amountOut","type":"uint256"},{"name":"sqrtPriceX96After","type":"uint160"},{"name":"initializedTicksCrossed","type":"uint32"},{"name":"gasEstimate","type":"uint256"}] },
+  // Quoter V1 fallback signature (some deployments)
+  { "type":"function","stateMutability":"view","name":"quoteExactInputSingle","inputs":[{"name":"tokenIn","type":"address"},{"name":"tokenOut","type":"address"},{"name":"fee","type":"uint24"},{"name":"amountIn","type":"uint256"},{"name":"sqrtPriceLimitX96","type":"uint160"}],"outputs":[{"name":"amountOut","type":"uint256"}] }
+];
+
+const V3_ROUTER_ABI = [
+  { "type":"function","stateMutability":"payable","name":"exactInputSingle","inputs":[{"name":"params","type":"tuple","components":[{"name":"tokenIn","type":"address"},{"name":"tokenOut","type":"address"},{"name":"fee","type":"uint24"},{"name":"recipient","type":"address"},{"name":"deadline","type":"uint256"},{"name":"amountIn","type":"uint256"},{"name":"amountOutMinimum","type":"uint256"},{"name":"sqrtPriceLimitX96","type":"uint160"}]}],"outputs":[{"name":"amountOut","type":"uint256"}] }
 ];
 
 function amountOutGivenIn(amountIn: bigint, reserveIn: bigint, reserveOut: bigint, feeBps = 30): bigint {
@@ -64,12 +76,40 @@ export default function SwapPage() {
     query: { enabled: !!FACTORY_ADDRESS && !!tokenIn && !!tokenOut }
   });
 
-  // reserves
+  // reserves (v2 path)
   const { data: reserves } = useReadContract({
     address: (pairAddr as `0x${string}`) || undefined,
     abi: V2_PAIR_ABI,
     functionName: "getReserves",
     query: { enabled: !!pairAddr }
+  });
+
+  // v2 hop via WETH
+  const { data: pairInWeth } = useReadContract({
+    address: FACTORY_ADDRESS as `0x${string}`,
+    abi: V2_FACTORY_ABI,
+    functionName: "getPair",
+    args: [tokenIn.address, WETH_ADDRESS as `0x${string}`],
+    query: { enabled: !!FACTORY_ADDRESS && !!WETH_ADDRESS }
+  });
+  const { data: reservesInWeth } = useReadContract({
+    address: (pairInWeth as `0x${string}`) || undefined,
+    abi: V2_PAIR_ABI,
+    functionName: "getReserves",
+    query: { enabled: !!pairInWeth }
+  });
+  const { data: pairWethOut } = useReadContract({
+    address: FACTORY_ADDRESS as `0x${string}`,
+    abi: V2_FACTORY_ABI,
+    functionName: "getPair",
+    args: [WETH_ADDRESS as `0x${string}`, tokenOut.address],
+    query: { enabled: !!FACTORY_ADDRESS && !!WETH_ADDRESS }
+  });
+  const { data: reservesWethOut } = useReadContract({
+    address: (pairWethOut as `0x${string}`) || undefined,
+    abi: V2_PAIR_ABI,
+    functionName: "getReserves",
+    query: { enabled: !!pairWethOut }
   });
 
   type Reserves = readonly [bigint, bigint, number];
@@ -83,10 +123,66 @@ export default function SwapPage() {
     return token0IsIn ? [r0, r1] as const : [r1, r0] as const;
   }, [reserves, tokenIn.address, tokenOut.address]);
 
-  const quoteOut = useMemo(() => {
+  const hopReserves1 = useMemo(() => {
+    const t = reservesInWeth as Reserves | undefined;
+    if (!t) return [0n, 0n] as const;
+    const token0IsIn = tokenIn.address.toLowerCase() < (WETH_ADDRESS as string).toLowerCase();
+    const r0 = t[0] ?? 0n;
+    const r1 = t[1] ?? 0n;
+    return token0IsIn ? [r0, r1] as const : [r1, r0] as const;
+  }, [reservesInWeth, tokenIn.address]);
+  const hopReserves2 = useMemo(() => {
+    const t = reservesWethOut as Reserves | undefined;
+    if (!t) return [0n, 0n] as const;
+    const token0IsIn = (WETH_ADDRESS as string).toLowerCase() < tokenOut.address.toLowerCase();
+    const r0 = t[0] ?? 0n;
+    const r1 = t[1] ?? 0n;
+    return token0IsIn ? [r0, r1] as const : [r1, r0] as const;
+  }, [reservesWethOut, tokenOut.address]);
+
+  // v2 quote (direct pair). Will be used if no v3 quoter configured
+  const v2Quote = useMemo(() => {
     if (!amountIn || !reserveIn || !reserveOut) return 0n;
     return amountOutGivenIn(amountIn, reserveIn, reserveOut, 30);
   }, [amountIn, reserveIn, reserveOut]);
+
+  const v2QuoteHop = useMemo(() => {
+    if (!amountIn || !hopReserves1[0] || !hopReserves1[1] || !hopReserves2[0] || !hopReserves2[1]) return 0n;
+    const out1 = amountOutGivenIn(amountIn, hopReserves1[0], hopReserves1[1], 30);
+    if (!out1) return 0n;
+    const out2 = amountOutGivenIn(out1, hopReserves2[0], hopReserves2[1], 30);
+    return out2;
+  }, [amountIn, hopReserves1, hopReserves2]);
+
+  // v3 quote via Quoter (single pool, default fee)
+  type V3QuoteParams = { tokenIn: `0x${string}`; tokenOut: `0x${string}`; fee: number; amountIn: bigint; sqrtPriceLimitX96: bigint };
+  const v3Params: V3QuoteParams | undefined = V3_QUOTER_ADDRESS ? {
+    tokenIn: tokenIn.address as `0x${string}`,
+    tokenOut: tokenOut.address as `0x${string}`,
+    fee: V3_FEE_DEFAULT,
+    amountIn,
+    sqrtPriceLimitX96: 0n,
+  } : undefined;
+
+  const { data: v3QuoteData } = useReadContract({
+    address: (V3_QUOTER_ADDRESS as `0x${string}`) || undefined,
+    abi: V3_QUOTER_ABI,
+    functionName: "quoteExactInputSingle",
+    args: v3Params ? [v3Params] : undefined,
+    query: { enabled: !!V3_QUOTER_ADDRESS && !!amountIn }
+  });
+
+  const quoteOut = useMemo(() => {
+    if (v3QuoteData) {
+      // QuoterV2 returns tuple; V1 returns single value
+      if (Array.isArray(v3QuoteData)) {
+        const first = v3QuoteData[0] as bigint;
+        return first ?? 0n;
+      }
+      return (v3QuoteData as bigint) ?? 0n;
+    }
+    return v2Quote;
+  }, [v3QuoteData, v2Quote]);
 
   const minOut = useMemo(() => quoteOut ? (quoteOut * BigInt(10000 - slippageBps)) / 10000n : 0n, [quoteOut, slippageBps]);
 
@@ -114,13 +210,35 @@ export default function SwapPage() {
 
   const doSwap = () => {
     if (!address) return;
-    const path = [tokenIn.address, tokenOut.address];
-    writeContract({
-      address: ROUTER_ADDRESS as `0x${string}`,
-      abi: V2_ROUTER_ABI,
-      functionName: "swapExactTokensForTokens",
-      args: [amountIn, minOut, path, address, BigInt(Math.floor(Date.now() / 1000) + deadlineMin * 60)]
-    });
+    const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineMin * 60);
+    if (V3_ROUTER_ADDRESS) {
+      type V3SwapParams = { tokenIn: `0x${string}`; tokenOut: `0x${string}`; fee: number; recipient: `0x${string}`; deadline: bigint; amountIn: bigint; amountOutMinimum: bigint; sqrtPriceLimitX96: bigint };
+      const params: V3SwapParams = {
+        tokenIn: tokenIn.address as `0x${string}`,
+        tokenOut: tokenOut.address as `0x${string}`,
+        fee: V3_FEE_DEFAULT,
+        recipient: address as `0x${string}`,
+        deadline,
+        amountIn,
+        amountOutMinimum: minOut,
+        sqrtPriceLimitX96: 0n,
+      };
+      writeContract({
+        address: V3_ROUTER_ADDRESS as `0x${string}`,
+        abi: V3_ROUTER_ABI,
+        functionName: "exactInputSingle",
+        args: [params]
+      });
+    } else {
+      const useHop = v2QuoteHop > v2Quote;
+      const path = useHop ? [tokenIn.address, WETH_ADDRESS as `0x${string}`, tokenOut.address] : [tokenIn.address, tokenOut.address];
+      writeContract({
+        address: ROUTER_ADDRESS as `0x${string}`,
+        abi: V2_ROUTER_ABI,
+        functionName: "swapExactTokensForTokens",
+        args: [amountIn, minOut, path, address, deadline]
+      });
+    }
   };
 
   return (
