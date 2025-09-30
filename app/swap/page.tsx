@@ -155,16 +155,25 @@ export default function SwapPage() {
   }, [amountIn, hopReserves1, hopReserves2]);
 
   // v3 quote via Quoter (single pool, default fee)
+  type V3QuoteParams = { tokenIn: `0x${string}`; tokenOut: `0x${string}`; fee: number; amountIn: bigint; sqrtPriceLimitX96: bigint };
+  const v3Params: V3QuoteParams | undefined = V3_QUOTER_ADDRESS ? {
+    tokenIn: tokenIn.address as `0x${string}`,
+    tokenOut: tokenOut.address as `0x${string}`,
+    fee: V3_FEE_DEFAULT,
+    amountIn,
+    sqrtPriceLimitX96: 0n,
+  } : undefined;
+
   const { data: v3QuoteData } = useReadContract({
     address: (V3_QUOTER_ADDRESS as `0x${string}`) || undefined,
     abi: V3_QUOTER_ABI,
     functionName: "quoteExactInputSingle",
-    args: V3_QUOTER_ADDRESS ? [{ tokenIn: tokenIn.address, tokenOut: tokenOut.address, fee: V3_FEE_DEFAULT, amountIn, sqrtPriceLimitX96: 0n }] as any : undefined,
+    args: v3Params ? [v3Params] : undefined,
     query: { enabled: !!V3_QUOTER_ADDRESS && !!amountIn }
   });
 
   const quoteOut = useMemo(() => {
-    if (V3_QUOTER_ADDRESS && v3QuoteData) {
+    if (v3QuoteData) {
       // QuoterV2 returns tuple; V1 returns single value
       if (Array.isArray(v3QuoteData)) {
         const first = v3QuoteData[0] as bigint;
@@ -173,7 +182,7 @@ export default function SwapPage() {
       return (v3QuoteData as bigint) ?? 0n;
     }
     return v2Quote;
-  }, [V3_QUOTER_ADDRESS, v3QuoteData, v2Quote]);
+  }, [v3QuoteData, v2Quote]);
 
   const minOut = useMemo(() => quoteOut ? (quoteOut * BigInt(10000 - slippageBps)) / 10000n : 0n, [quoteOut, slippageBps]);
 
@@ -203,11 +212,22 @@ export default function SwapPage() {
     if (!address) return;
     const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineMin * 60);
     if (V3_ROUTER_ADDRESS) {
+      type V3SwapParams = { tokenIn: `0x${string}`; tokenOut: `0x${string}`; fee: number; recipient: `0x${string}`; deadline: bigint; amountIn: bigint; amountOutMinimum: bigint; sqrtPriceLimitX96: bigint };
+      const params: V3SwapParams = {
+        tokenIn: tokenIn.address as `0x${string}`,
+        tokenOut: tokenOut.address as `0x${string}`,
+        fee: V3_FEE_DEFAULT,
+        recipient: address as `0x${string}`,
+        deadline,
+        amountIn,
+        amountOutMinimum: minOut,
+        sqrtPriceLimitX96: 0n,
+      };
       writeContract({
         address: V3_ROUTER_ADDRESS as `0x${string}`,
         abi: V3_ROUTER_ABI,
         functionName: "exactInputSingle",
-        args: [{ tokenIn: tokenIn.address, tokenOut: tokenOut.address, fee: V3_FEE_DEFAULT, recipient: address, deadline, amountIn, amountOutMinimum: minOut, sqrtPriceLimitX96: 0n } as any]
+        args: [params]
       });
     } else {
       const useHop = v2QuoteHop > v2Quote;
